@@ -33,8 +33,8 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
-      <body className={`font-sans antialiased ${GeistSans.variable} ${GeistMono.variable}`}>
+    <html lang="en" className="bg-white">
+      <body className={`font-sans antialiased bg-white ${GeistSans.variable} ${GeistMono.variable}`}>
         {children}
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
