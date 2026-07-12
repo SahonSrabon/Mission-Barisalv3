@@ -1,11 +1,12 @@
 /**
  * Mission Barisal Server API Client
  * 
- * Handles all communication with the Node.js server at port 5000
- * API Reference: http://localhost:5000 (see SETUP.md and API.md)
+ * Connects to Mission Barisal v3 server at api.selfsmartearning.com
+ * Server File: hamba.js (9,323 lines, zero-dependency Node.js)
+ * Endpoints: REST + WebSocket + JSON-RPC 2.0 (MCP)
  */
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:5000";
+const API_BASE_URL = process.env.NEXT_PUBLIC_SERVER_URL || "http://api.selfsmartearning.com";
 
 interface ApiResponse<T> {
   ok: boolean;
@@ -239,7 +240,7 @@ export async function chatCompletion(
  */
 export async function healthCheck(): Promise<boolean> {
   try {
-    const response = await fetch(`${API_BASE_URL}/v1/models`, {
+    const response = await fetch(`${API_BASE_URL}/health`, {
       method: "GET",
       headers: { "Content-Type": "application/json" },
     });
@@ -247,5 +248,214 @@ export async function healthCheck(): Promise<boolean> {
   } catch (error) {
     console.error("[API] Health check failed:", error);
     return false;
+  }
+}
+
+// ============ MONITORING DASHBOARD ENDPOINTS ============
+
+interface HealthResponse {
+  healthy: boolean;
+  version: string;
+  domain: string;
+  serverType: string;
+  agents: number;
+  models: number;
+  pusher: boolean;
+  hasFrontend: boolean;
+  maxRateLimit: number;
+  uptime: number;
+  session_count: number;
+  rate_limit: { limited: boolean; domain: string };
+}
+
+interface AdminStats {
+  server: {
+    version: string;
+    domain: string;
+    type: string;
+    uptime_sec: number;
+    total_requests: number;
+    agents: number;
+    providers: number;
+    models: number;
+    pusher: boolean;
+    frontend: boolean;
+    sessions: number;
+    memory_rss_mb: number;
+    memory_heap_mb: number;
+    lock_log_entries: number;
+  };
+  usage: {
+    providers: Record<string, any>;
+    models: Record<string, any>;
+    agents: Record<string, any>;
+    domains: Record<string, any>;
+  };
+  rate_limit: { limited: boolean; provider: string | null; model: string | null };
+  agents: Array<{ id: string; name: string; role: string; priority: number }>;
+}
+
+interface Agent {
+  id: string;
+  name: string;
+  role: string;
+  model: string;
+  provider: string;
+}
+
+interface Session {
+  id: string;
+  client_id: string;
+  editor: string;
+  model: string;
+  provider: string;
+  messages: number;
+  status: string;
+  created_at: string;
+  last_activity: string;
+}
+
+interface LockEntry {
+  agent: string;
+  operation: string;
+  status: string;
+  duration_ms: number;
+  timestamp: string;
+}
+
+interface MCPClient {
+  name: string;
+  version: string;
+  status: string;
+  working_dir: string;
+}
+
+/**
+ * GET /health — Server health check
+ */
+export async function getHealth(): Promise<HealthResponse | null> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/health`);
+    if (!response.ok) throw new Error(`${response.status}`);
+    return await response.json();
+  } catch (error) {
+    console.error("[API] Health check failed:", error);
+    return null;
+  }
+}
+
+/**
+ * GET /api/admin/stats — Full runtime statistics
+ */
+export async function getAdminStats(): Promise<AdminStats | null> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/admin/stats`);
+    if (!response.ok) throw new Error(`${response.status}`);
+    return await response.json();
+  } catch (error) {
+    console.error("[API] Failed to get admin stats:", error);
+    return null;
+  }
+}
+
+/**
+ * GET /api/agents — List all agents
+ */
+export async function getAgents(): Promise<Agent[]> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/agents`);
+    if (!response.ok) throw new Error(`${response.status}`);
+    const data = await response.json();
+    return data.agents || [];
+  } catch (error) {
+    console.error("[API] Failed to get agents:", error);
+    return [];
+  }
+}
+
+/**
+ * GET /api/sessions — Active sessions
+ */
+export async function getSessions(): Promise<Session[]> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/sessions`);
+    if (!response.ok) throw new Error(`${response.status}`);
+    const data = await response.json();
+    return data.sessions || [];
+  } catch (error) {
+    console.error("[API] Failed to get sessions:", error);
+    return [];
+  }
+}
+
+/**
+ * GET /api/locks — Lock log (audit trail)
+ */
+export async function getLocks(limit: number = 50): Promise<LockEntry[]> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/locks?limit=${limit}`);
+    if (!response.ok) throw new Error(`${response.status}`);
+    const data = await response.json();
+    return data.latest || [];
+  } catch (error) {
+    console.error("[API] Failed to get locks:", error);
+    return [];
+  }
+}
+
+/**
+ * GET /api/mcp-clients — Connected MCP clients
+ */
+export async function getMCPClients(): Promise<MCPClient[]> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/mcp-clients`);
+    if (!response.ok) throw new Error(`${response.status}`);
+    const data = await response.json();
+    return data.connected_clients || [];
+  } catch (error) {
+    console.error("[API] Failed to get MCP clients:", error);
+    return [];
+  }
+}
+
+/**
+ * GET /api/domain — Domain detection
+ */
+export async function getDomainInfo(): Promise<any> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/domain`);
+    if (!response.ok) throw new Error(`${response.status}`);
+    return await response.json();
+  } catch (error) {
+    console.error("[API] Failed to get domain info:", error);
+    return null;
+  }
+}
+
+/**
+ * GET /api/config — Runtime configuration
+ */
+export async function getConfig(): Promise<any> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/config`);
+    if (!response.ok) throw new Error(`${response.status}`);
+    return await response.json();
+  } catch (error) {
+    console.error("[API] Failed to get config:", error);
+    return null;
+  }
+}
+
+/**
+ * GET /api/rate-limit — Rate limit status
+ */
+export async function getRateLimit(): Promise<any> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/rate-limit`);
+    if (!response.ok) throw new Error(`${response.status}`);
+    return await response.json();
+  } catch (error) {
+    console.error("[API] Failed to get rate limit:", error);
+    return null;
   }
 }

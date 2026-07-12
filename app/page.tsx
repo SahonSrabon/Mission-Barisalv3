@@ -1,5 +1,5 @@
-import ChatInterface from "@/components/chat-interface";
+import MonitoringDashboard from "@/components/monitoring-dashboard";
 
 export default function Home() {
-  return <ChatInterface />;
+  return <MonitoringDashboard />;
 }
