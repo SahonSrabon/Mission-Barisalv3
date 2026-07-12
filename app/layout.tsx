@@ -5,9 +5,10 @@ import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'v0 App',
-  description: 'Created with v0',
-  generator: 'v0.app',
+  title: 'Mission Barisal - AI Code Assistant',
+  description: 'Multi-agent AI assistant for code explanation, debugging, and architecture analysis. Powered by Mission Barisal Server.',
+  generator: 'Mission Barisal',
+  keywords: ['AI', 'Code Assistant', 'GitHub Copilot', 'Code Analysis', 'Documentation'],
   icons: {
     icon: [
       {
@@ -24,6 +25,11 @@ export const metadata: Metadata = {
       },
     ],
     apple: '/apple-icon.png',
+  },
+  openGraph: {
+    title: 'Mission Barisal - AI Code Assistant',
+    description: 'Multi-agent AI system for comprehensive code analysis and documentation',
+    type: 'website',
   },
 }
 
