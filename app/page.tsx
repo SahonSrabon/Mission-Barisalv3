@@ -1,7 +1,5 @@
-"use client"
+import MonitoringDashboard from "@/components/monitoring-dashboard";
 
-import { activate } from "../src/extension"
-
-export default function SyntheticV0PageForDeployment() {
-  return <activate />
+export default function Home() {
+  return <MonitoringDashboard />;
 }

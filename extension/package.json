@@ -1,0 +1,143 @@
+{
+  "name": "mission-barisal",
+  "displayName": "Mission Barisal - AI Code Assistant",
+  "description": "Multi-agent AI assistant for code explanation, debugging, and architecture analysis",
+  "version": "1.0.0",
+  "publisher": "SahonSrabon",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SahonSrabon/Mission-Barisalv3"
+  },
+  "categories": [
+    "AI",
+    "Debuggers",
+    "Education"
+  ],
+  "keywords": [
+    "ai",
+    "code-assistant",
+    "copilot",
+    "debugging",
+    "documentation"
+  ],
+  "icon": "resources/icon-128.png",
+  "galleryBanner": {
+    "color": "#1a202c",
+    "theme": "dark"
+  },
+  "main": "./out/extension.js",
+  "activationEvents": [
+    "onStartupFinished",
+    "onCommand:missionBarisal.activate",
+    "onCommand:missionBarisal.askQuestion",
+    "onCommand:missionBarisal.explainCode",
+    "onWebviewPanel:missionBarisal.webview"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "missionBarisal.activate",
+        "title": "Mission Barisal: Start Server",
+        "category": "Mission Barisal"
+      },
+      {
+        "command": "missionBarisal.askQuestion",
+        "title": "Mission Barisal: Ask Question",
+        "category": "Mission Barisal",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "missionBarisal.explainCode",
+        "title": "Mission Barisal: Explain Selected Code",
+        "category": "Mission Barisal",
+        "when": "editorHasSelection"
+      },
+      {
+        "command": "missionBarisal.showStatus",
+        "title": "Mission Barisal: Show Status",
+        "category": "Mission Barisal"
+      },
+      {
+        "command": "missionBarisal.viewDashboard",
+        "title": "Mission Barisal: Open Dashboard",
+        "category": "Mission Barisal"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "missionBarisal.askQuestion",
+        "key": "ctrl+shift+m",
+        "mac": "cmd+shift+m"
+      },
+      {
+        "command": "missionBarisal.explainCode",
+        "key": "ctrl+shift+e",
+        "mac": "cmd+shift+e"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "command": "missionBarisal.explainCode",
+          "group": "1_modification",
+          "when": "editorHasSelection"
+        },
+        {
+          "command": "missionBarisal.askQuestion",
+          "group": "1_modification"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "missionBarisal.activate"
+        },
+        {
+          "command": "missionBarisal.askQuestion"
+        },
+        {
+          "command": "missionBarisal.explainCode"
+        },
+        {
+          "command": "missionBarisal.showStatus"
+        },
+        {
+          "command": "missionBarisal.viewDashboard"
+        }
+      ]
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "missionBarisal",
+          "title": "Mission Barisal",
+          "icon": "resources/icon-48.png"
+        }
+      ]
+    },
+    "views": {
+      "missionBarisal": [
+        {
+          "id": "missionBarisal.status",
+          "name": "Server Status",
+          "type": "webview"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile && npm run minify",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile",
+    "test": "node ./out/test/runTest.js",
+    "minify": "node -e \"const fs=require('fs'); const code=fs.readFileSync('./out/extension.js','utf8'); fs.writeFileSync('./out/extension.js', code);\""
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.85.0",
+    "@types/node": "^20.0.0",
+    "typescript": "^5.3.0"
+  }
+}
